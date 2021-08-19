@@ -8,7 +8,6 @@ authors = ["Peder Hovdan Andresen <pedeha@stud.ntnu.no>"]
 python = "^3.8"
 fastapi = "^0.68.0"
 uvicorn = "^0.15.0"
-gunicorn = "^20.1.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "^4.6"
