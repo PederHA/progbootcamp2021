@@ -1,10 +1,19 @@
 asgiref==3.4.1
+atomicwrites==1.4.0
+attrs==21.2.0
 click==8.0.1
 colorama==0.4.4; sys_platform == "win32" and python_version != "3.4" or platform_system == "Windows"
 fastapi==0.68.0
-gunicorn==20.1.0
 h11==0.12.0
+more-itertools==8.8.0; python_version > "2.7"
+packaging==21.0
+pluggy==0.13.1
+py==1.10.0
 pydantic==1.8.2
+pyparsing==2.4.7
+pytest==4.6.11
+six==1.16.0
 starlette==0.14.2
 typing-extensions==3.10.0.0
 uvicorn==0.15.0
+wcwidth==0.2.5
