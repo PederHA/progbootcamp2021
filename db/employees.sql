@@ -38,62 +38,209 @@ DROP TABLE IF EXISTS dept_emp,
 /*!50503 set default_storage_engine = InnoDB */;
 /*!50503 select CONCAT('storage engine: ', @@default_storage_engine) as INFO */;
 
-CREATE TABLE employees (
-    emp_no      INT             NOT NULL,
-    birth_date  DATE            NOT NULL,
-    first_name  VARCHAR(14)     NOT NULL,
-    last_name   VARCHAR(16)     NOT NULL,
-    gender      ENUM ('M','F')  NOT NULL,    
-    hire_date   DATE            NOT NULL,
-    PRIMARY KEY (emp_no)
+--
+-- Stand-in structure for view `current_dept_emp`
+-- (See below for the actual view)
+--
+CREATE TABLE `current_dept_emp` (
+`emp_no` int(11)
+,`dept_no` char(4)
+,`from_date` date
+,`to_date` date
 );
 
-CREATE TABLE departments (
-    dept_no     CHAR(4)         NOT NULL,
-    dept_name   VARCHAR(40)     NOT NULL,
-    PRIMARY KEY (dept_no),
-    UNIQUE  KEY (dept_name)
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `departments`
+--
+
+CREATE TABLE `departments` (
+  `dept_no` char(4) NOT NULL,
+  `dept_name` varchar(40) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `dept_emp`
+--
+
+CREATE TABLE `dept_emp` (
+  `emp_no` int(11) NOT NULL,
+  `dept_no` char(4) NOT NULL,
+  `from_date` date NOT NULL,
+  `to_date` date NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- --------------------------------------------------------
+
+--
+-- Stand-in structure for view `dept_emp_latest_date`
+-- (See below for the actual view)
+--
+CREATE TABLE `dept_emp_latest_date` (
+`emp_no` int(11)
+,`from_date` date
+,`to_date` date
 );
 
-CREATE TABLE dept_manager (
-   emp_no       INT             NOT NULL,
-   dept_no      CHAR(4)         NOT NULL,
-   from_date    DATE            NOT NULL,
-   to_date      DATE            NOT NULL,
-   FOREIGN KEY (emp_no)  REFERENCES employees (emp_no)    ON DELETE CASCADE,
-   FOREIGN KEY (dept_no) REFERENCES departments (dept_no) ON DELETE CASCADE,
-   PRIMARY KEY (emp_no,dept_no)
-); 
+-- --------------------------------------------------------
 
-CREATE TABLE dept_emp (
-    emp_no      INT             NOT NULL,
-    dept_no     CHAR(4)         NOT NULL,
-    from_date   DATE            NOT NULL,
-    to_date     DATE            NOT NULL,
-    FOREIGN KEY (emp_no)  REFERENCES employees   (emp_no)  ON DELETE CASCADE,
-    FOREIGN KEY (dept_no) REFERENCES departments (dept_no) ON DELETE CASCADE,
-    PRIMARY KEY (emp_no,dept_no)
-);
+--
+-- Table structure for table `dept_manager`
+--
 
-CREATE TABLE titles (
-    emp_no      INT             NOT NULL,
-    title       VARCHAR(50)     NOT NULL,
-    from_date   DATE            NOT NULL,
-    to_date     DATE,
-    FOREIGN KEY (emp_no) REFERENCES employees (emp_no) ON DELETE CASCADE,
-    PRIMARY KEY (emp_no,title, from_date)
-) 
-; 
+CREATE TABLE `dept_manager` (
+  `emp_no` int(11) NOT NULL,
+  `dept_no` char(4) NOT NULL,
+  `from_date` date NOT NULL,
+  `to_date` date NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-CREATE TABLE salaries (
-    emp_no      INT             NOT NULL,
-    salary      INT             NOT NULL,
-    from_date   DATE            NOT NULL,
-    to_date     DATE            NOT NULL,
-    FOREIGN KEY (emp_no) REFERENCES employees (emp_no) ON DELETE CASCADE,
-    PRIMARY KEY (emp_no, from_date)
-) 
-; 
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `employees`
+--
+
+CREATE TABLE `employees` (
+  `emp_no` int(11) NOT NULL,
+  `birth_date` date NOT NULL,
+  `first_name` varchar(14) NOT NULL,
+  `last_name` varchar(16) NOT NULL,
+  `gender` enum('M','F') NOT NULL,
+  `hire_date` date NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `salaries`
+--
+
+CREATE TABLE `salaries` (
+  `emp_no` int(11) NOT NULL,
+  `salary` int(11) NOT NULL,
+  `from_date` date NOT NULL,
+  `to_date` date NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `titles`
+--
+
+CREATE TABLE `titles` (
+  `emp_no` int(11) NOT NULL,
+  `title` varchar(50) NOT NULL,
+  `from_date` date NOT NULL,
+  `to_date` date DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- --------------------------------------------------------
+
+--
+-- Structure for view `current_dept_emp`
+--
+DROP TABLE IF EXISTS `current_dept_emp`;
+
+CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `current_dept_emp`  AS SELECT `l`.`emp_no` AS `emp_no`, `d`.`dept_no` AS `dept_no`, `l`.`from_date` AS `from_date`, `l`.`to_date` AS `to_date` FROM (`dept_emp` `d` join `dept_emp_latest_date` `l` on(`d`.`emp_no` = `l`.`emp_no` and `d`.`from_date` = `l`.`from_date` and `l`.`to_date` = `d`.`to_date`)) ;
+
+-- --------------------------------------------------------
+
+--
+-- Structure for view `dept_emp_latest_date`
+--
+DROP TABLE IF EXISTS `dept_emp_latest_date`;
+
+CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `dept_emp_latest_date`  AS SELECT `dept_emp`.`emp_no` AS `emp_no`, max(`dept_emp`.`from_date`) AS `from_date`, max(`dept_emp`.`to_date`) AS `to_date` FROM `dept_emp` GROUP BY `dept_emp`.`emp_no` ;
+
+--
+-- Indexes for dumped tables
+--
+
+--
+-- Indexes for table `departments`
+--
+ALTER TABLE `departments`
+  ADD PRIMARY KEY (`dept_no`),
+  ADD UNIQUE KEY `dept_name` (`dept_name`);
+
+--
+-- Indexes for table `dept_emp`
+--
+ALTER TABLE `dept_emp`
+  ADD PRIMARY KEY (`emp_no`,`dept_no`),
+  ADD KEY `dept_emp_ibfk_2` (`dept_no`);
+
+--
+-- Indexes for table `dept_manager`
+--
+ALTER TABLE `dept_manager`
+  ADD PRIMARY KEY (`emp_no`,`dept_no`),
+  ADD KEY `dept_no` (`dept_no`);
+
+--
+-- Indexes for table `employees`
+--
+ALTER TABLE `employees`
+  ADD PRIMARY KEY (`emp_no`),
+  ADD KEY `birth_date` (`birth_date`);
+
+--
+-- Indexes for table `salaries`
+--
+ALTER TABLE `salaries`
+  ADD PRIMARY KEY (`emp_no`,`from_date`);
+
+--
+-- Indexes for table `titles`
+--
+ALTER TABLE `titles`
+  ADD PRIMARY KEY (`emp_no`,`title`,`from_date`);
+
+--
+-- AUTO_INCREMENT for dumped tables
+--
+
+--
+-- AUTO_INCREMENT for table `employees`
+--
+ALTER TABLE `employees`
+  MODIFY `emp_no` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- Constraints for dumped tables
+--
+
+--
+-- Constraints for table `dept_emp`
+--
+ALTER TABLE `dept_emp`
+  ADD CONSTRAINT `dept_emp_ibfk_1` FOREIGN KEY (`emp_no`) REFERENCES `employees` (`emp_no`) ON DELETE CASCADE,
+  ADD CONSTRAINT `dept_emp_ibfk_2` FOREIGN KEY (`dept_no`) REFERENCES `departments` (`dept_no`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Constraints for table `dept_manager`
+--
+ALTER TABLE `dept_manager`
+  ADD CONSTRAINT `dept_manager_ibfk_1` FOREIGN KEY (`emp_no`) REFERENCES `employees` (`emp_no`) ON DELETE CASCADE,
+  ADD CONSTRAINT `dept_manager_ibfk_2` FOREIGN KEY (`dept_no`) REFERENCES `departments` (`dept_no`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `salaries`
+--
+ALTER TABLE `salaries`
+  ADD CONSTRAINT `salaries_empno` FOREIGN KEY (`emp_no`) REFERENCES `employees` (`emp_no`);
+
+--
+-- Constraints for table `titles`
+--
+ALTER TABLE `titles`
+  ADD CONSTRAINT `titles_fk` FOREIGN KEY (`emp_no`) REFERENCES `employees` (`emp_no`);
+COMMIT;
 
 CREATE OR REPLACE VIEW dept_emp_latest_date AS
     SELECT emp_no, MAX(from_date) AS from_date, MAX(to_date) AS to_date
