@@ -270,5 +270,3 @@ SELECT 'LOADING salaries' as 'INFO';
 source /docker-entrypoint-initdb.d/load_salaries1.dump ;
 source /docker-entrypoint-initdb.d/load_salaries2.dump ;
 source /docker-entrypoint-initdb.d/load_salaries3.dump ;
-
-source show_elapsed.sql ;
