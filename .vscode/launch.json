@@ -13,8 +13,6 @@
             "args": [
                 "restclient:app",
                 "--reload",
-                "--port",
-                "8081"
             ],
             "jinja": true
         },
